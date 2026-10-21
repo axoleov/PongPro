@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pongpro"
+version = "1.0.0"
+description = "Production-grade Pong for Windows 10: fixed-timestep simulation, procedural audio, replays."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "PongPro" }]
+keywords = ["game", "pong", "pygame"]
+
+# pygame 2.6 is the runtime this project is built and tested against (it is
+# what `pip install .` resolves to on the reference machine).  numpy drives
+# physics prediction, procedural audio synthesis and the particle system.
+dependencies = [
+    "pygame>=2.6",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.0",
+]
+
+[project.scripts]
+pongpro = "pongpro.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pongpro = ["py.typed"]
