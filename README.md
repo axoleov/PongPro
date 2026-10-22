@@ -1,230 +1,307 @@
 # PongPro
 
-A production-grade Pong for Windows 10, built on **Python 3.12** and
-**pygame 2.6**. No binary assets: every sound effect, the music loop, and all
-visuals are generated at runtime.
+A Pong game for Windows — the classic game where you bounce a ball back and
+forth and try to get it past your opponent.
 
-## Play it
+It is written in **Python**, using a game library called **pygame**.
 
-Download this repository and double-click **`Builds\PongPro.exe`** — one
-standalone executable that runs on any Windows 10/11 PC with no Python and
-nothing to install.
+**There are no picture or sound files in this project.** The computer draws
+every image and makes every sound while the game is running.
 
-To run from source instead, double-click **`run.bat`**: it finds Python,
-installs `pygame` and `numpy` on first use, and starts the game.
+---
 
-## Highlights
+## ▶ How to play (the easy way)
 
-- **Deterministic fixed-timestep simulation** (120 Hz physics) with render
-  interpolation, a frame-time clamp and a sub-step cap, so a hitch can never
-  cause a spiral of death.
-- **Scene state machine** — splash → menu → match → pause → results → replay,
-  with fade transitions and a typed event bus decoupling gameplay from
-  presentation.
-- **Human-feeling AI** — predictive intercept (wall reflections included),
-  per-difficulty reaction delay, gaussian aim error, deliberate whiffs and
-  speed caps. Fully reproducible from its seed. The ladder is *measured*, not
-  asserted: `tests\test_ai.py` runs full physics against a partner that never
-  misses and pins how often each level lets the ball past — at least 62% /
-  82% / 92% / 96% of arrivals returned for EASY → ELITE, with EASY held under
-  90% so it stays beatable. Whiffs only ever cost one observation interval,
-  so no difficulty can stand and watch a ball arrive.
-- **Procedural audio** — paddle blips that rise in pitch as the rally grows,
-  a goal fanfare, UI clicks and an 8-second music loop, all synthesised with
-  NumPy.
-- **Replay** — the last match is recorded as compact integer snapshots and can
-  be watched back from the results screen.
-- **Coins & shop** — a match pays out into a coin wallet; the shop spends them
-  on cosmetics (balls, paddles, backgrounds, trails, hit effects) and
-  gameplay-altering **powerups** (giant paddle, magnet, fire ball, shield,
-  gold rush, freeze ray, shrink ray, reverser, slow field).
-- **Robust persistence** — versioned JSON in `%LOCALAPPDATA%\PongPro`, atomic
-  writes, corruption quarantine and migration hooks. The wallet lives in its
-  own `shop.json` so an older build can never destroy purchases. The first run
-  over a v1 profile also corrects a counter the old build doubled on every
-  match: lifetime *returns* restart from zero, while wins, losses, playtime,
-  longest rally and the per-difficulty table are carried over untouched.
+You do **not** need to install anything.
 
-## Running from source
+1. Click the green **Code** button at the top of this page and choose
+   **Download ZIP**.
+2. Unzip the file and open the folder.
+3. Open the **Builds** folder.
+4. Double-click **PongPro.exe**.
 
-**Windows: double-click `run.bat`.** It locates Python, installs `pygame` and
-`numpy` if they are missing, then starts the game — no commands to remember.
+The game starts. That's it.
 
-```bat
+### If Windows says "Windows protected your PC"
+
+Windows shows this because the game was not made by a big company, so Windows
+does not recognise it. **It is not a virus.**
+
+Click **More info**, then **Run anyway**.
+
+---
+
+## 🎮 Controls
+
+| What you want to do | Keys |
+| --- | --- |
+| Move your paddle (1 player) | `W` / `S`, or `↑` / `↓` |
+| Move your paddle (player 2) | `↑` / `↓` |
+| Left paddle in Focus Mode | `W` / `S` |
+| Right paddle in Focus Mode | `I` / `K`, or `↑` / `↓` |
+| Fire a powerup (player 1) | `Space` |
+| Fire a powerup (player 2 / right paddle) | `Enter` or `Keypad Enter` |
+| Pause the game, or go back a screen | `Esc` or `P` |
+| Move around the menus | `↑` `↓` `←` `→`, `Enter`, or the mouse |
+| Show the controls card while playing | `H` (from the menu) |
+| Start a mode straight from the menu | `1` 1P · `2` 2P · `3` AI vs AI · `4` Focus |
+| Open the shop (from the menu) | `F3` |
+| Open settings (from the menu) | `F4` |
+| Show the computer-player helper screen (for developers) | `F2` (during a match) |
+
+---
+
+## 🕹 The 4 game modes
+
+| Mode | What happens |
+| --- | --- |
+| **1 Player · vs AI** | You play against the computer. It has 4 levels: EASY, NORMAL, HARD, ELITE. |
+| **2 Players · Local** | Two people share one keyboard. |
+| **Focus Mode** | *You* control **both** paddles. Keep the ball from getting past either side. |
+| **AI vs AI** | You sit back and watch two computers play each other. |
+
+### How good is the computer player?
+
+We didn't just guess — we tested it. The game plays itself over and over, and
+we counted how often each level manages to hit the ball back:
+
+| Level | Hits the ball back |
+| --- | --- |
+| EASY | between 62% and 90% of the time (it misses a lot, so you can beat it) |
+| NORMAL | at least 82% |
+| HARD | at least 92% |
+| ELITE | at least 96% (it almost never misses) |
+
+The bots also hesitate, aim slightly wrong and occasionally miss on purpose,
+so they feel like a person rather than a robot that never fails.
+
+### Focus Mode, in simple words
+
+Focus is different from the other three modes. There is no opponent, no score,
+and no winner — it is just you against the ball.
+
+- **You move two paddles.** `W`/`S` moves the left one. `I`/`K` (or `↑`/`↓`)
+  moves the right one. Both sets of keys work at the same time.
+- **You have lives instead of points.** The "First to N" number you choose in
+  the menu becomes your number of lives. If the ball gets past both of your
+  paddles you lose one life. When your lives reach 0, the run is over.
+- **Powerups are turned off** in this mode, so nothing unfair floats onto the
+  court.
+- **One special pickup: the Life Orb.** It is a gold ball. Touch it and you get
+  `+1` life. If you already have full lives, it gives you coins instead. You
+  **cannot buy it in the shop** — you only find it inside Focus Mode.
+- **The ball speeds up** every time you hit it back. Losing a life slows it
+  down a little (to 70%), but never below the speed of the very first serve, so
+  one mistake can't make the game easier.
+- **Your best run is remembered.** Your longest survival time and your best
+  number of returns are saved and shown on the menu.
+
+The first time you open Focus Mode, a help page shows you the rules. It has a
+**don't show again** tick box, so it won't bother you afterwards.
+
+---
+
+## 🪙 Coins, the shop and powerups
+
+### How you earn coins
+
+- Every match pays you coins when it ends.
+- What you earn depends on: taking part, the points you scored, your longest
+  rally (how many times you hit the ball in a row), and how many returns you
+  made. There is a bonus for winning too.
+- Beating a harder computer pays more.
+- **Gold Rush** pays coins *while* the match is still going, and the results
+  screen shows you both totals.
+
+You start the game with **250 coins**. The shop has **53 things** to buy.
+
+The free "classic" look of each category, plus two powerups (**No Powerup**
+and **Overdrive**), are yours from the beginning.
+
+### What you can buy
+
+- **Looks** — different balls, paddles, backgrounds, trails and hit effects.
+  These only change how the game looks.
+- **Powerups** — special moves you can fire during a match.
+
+### Moving around the shop
+
+- `↑` `↓` move up and down the list
+- `←` `→` change the category
+- `Enter` buys or selects the highlighted item
+- `Esc` leaves the shop
+- The **mouse wheel** scrolls down the list, so there is no page key to learn
+- You can also click things with the mouse
+
+The list shows 7 items at a time. A little bar (a scrollbar) sits beside it,
+and the line underneath tells you where you are, for example
+`SHOWING 4-10 OF 10`.
+
+### How powerups work
+
+- Every paddle holds **its own** powerup.
+- You always use the one you chose. The **computer picks one at random from
+  your own collection**, so it does not simply copy your choice.
+  - In 1 Player mode only the computer draws one.
+  - In AI vs AI mode both computers draw one.
+  - In 2 Players mode both people share the same chosen powerup, so the duel
+    stays fair.
+- **You fire it yourself** with `Space` (or `Enter` for player 2). The computer
+  waits a moment before firing.
+
+### Pickup bubbles
+
+- A few seconds into a rally, a glowing powerup ball drifts onto the court.
+- It goes to whichever paddle **hit the ball last**. The ball has to have
+  bounced off a paddle first — a serve that just floats through gives nobody
+  anything.
+- Grabbing it does **not** throw away the powerup you were holding. You keep
+  both.
+- If nobody picks it up within **30 seconds** it vanishes, and a fresh one
+  arrives 3–7 seconds later.
+- Two of the same effect never stack on top of each other. Different effects
+  can work together normally.
+
+### REVERSER (the confusing one)
+
+REVERSER flips your controls left-to-right, so you have to re-learn your own
+hands while under pressure.
+
+For the computer player it is **not** a perfect flip: it keeps trying to work
+out the right place to move, but reads its own inputs wrong in bursts, so it
+overshoots and then corrects itself — like a player who is disoriented. It is
+still a heavy penalty, but never a free point either way.
+
+---
+
+## 🖥 Running the game from the code
+
+Only do this if you want to **change** the game. To just play it, use
+`Builds\PongPro.exe` above.
+
+### The easy way
+
+Double-click **`run.bat`** in the main project folder. It will:
+
+1. Look for Python on your computer.
+2. Download **pygame** and **numpy** if they are missing (needs internet the
+   first time).
+3. Start the game.
+
+### The manual way
+
+Open a command prompt in the project folder and type these two lines, one at a
+time:
+
+```
 python -m pip install -e .
 python main.py
 ```
 
-`main.py` works straight from a checkout (it adds `src/` to `sys.path`);
-`pip install -e .` is recommended for day-to-day development.
+- The first line installs the game's parts.
+- The second line starts the game.
 
-Useful flags (via `python -m pongpro`): `--skip-splash`, `--frames N`
-(headless-friendly CI smoke run), `--quiet`.
+**You need:** Python 3.11 or newer. The game was built with Python 3.12.
 
-## Controls
+Some handy options (use them with `python -m pongpro`):
 
-| Action | Keys |
-| --- | --- |
-| Player 1 paddle | `W` / `S` (or `↑` / `↓`) |
-| Player 2 paddle (2-player mode) | `↑` / `↓` |
-| Left paddle (FOCUS mode) | `W` / `S` |
-| Right paddle (FOCUS mode) | `I` / `K` **or** `↑` / `↓` |
-| Fire powerup (P1) | `Space` |
-| Fire powerup (P2 / right paddle) | `Enter` or `Keypad Enter` |
-| Pause / back | `Esc` or `P` |
-| Menu navigation | `↑` `↓` `←` `→`, `Enter`, mouse |
-| Show the in-game controls card | `H` (from the menu) |
-| Pick a mode straight from the menu | `1` 1P · `2` 2P · `3` AI vs AI · `4` Focus Mode |
-| Open shop (from menu) | `F3` |
-| Settings (from menu) | `F4` |
-| AI debug overlay (in match) | `F2` |
+- `--skip-splash` — skip the intro screen
+- `--frames N` — run N frames then stop (useful for testing)
+- `--quiet` — less text in the window
 
-## Modes
+---
 
-| Mode | What it is |
-| --- | --- |
-| **1 Player · vs AI** | Standard match against the bot ladder (EASY → ELITE). |
-| **2 Players · Local** | Shared-keyboard duel. |
-| **Focus Mode** | The brain-exercise mode: one player drives **both** paddles and keeps the ball off *both* goal lines. See below. |
-| **AI vs AI** | Spectate two bots. |
+## 🔨 Making your own copy of the game
 
-### Focus
+Changed the code and want a new `PongPro.exe`? Run this from the project
+folder:
 
-Focus inverts what the other three modes assume: there is no opponent, no
-score, and no winner — only you against the ball.
-
-- **One player, two paddles.** `W`/`S` drives the left, `I`/`K` *or*
-  `↑`/`↓` drives the right. Both bindings work simultaneously.
-- **Lives replace points.** The *First to N* rule you pick in the menu becomes
-  your starting life count instead of a points target, and the run ends when
-  the last one is spent.
-- **Powerups are off** in this mode, so none of the shop's powerups appear as
-  pickups. Everything cosmetic still applies — your equipped ball, trail, paddle
-  and background are all used, and your total returns still count.
-- **One pickup: the Life Orb.** A gold orb grants `+1` life, capped at the
-  count you started the run with; at full health it pays bonus coins instead.
-  It is deliberately **not sold in the shop** — it is FOCUS's own pickup and
-  nothing else.
-- **Speed still climbs** every return, exactly as in a duel. Losing a life
-  resets it part-way (to 70%) but never below the opening serve, so a quick
-  mistake can't make the run easier than its own first ball.
-- **Your best run is kept.** Longest survival time and most returns are stored
-  in your profile and shown on the menu.
-
-The first time you enter Focus, a one-page explainer opens with the rules; it
-offers a **don't show again** toggle and never reappears once dismissed.
-
-
-In the shop: `↑` `↓` move (tabs → items → BACK), `←` `→` switch category,
-`Enter` buys or equips, `Esc` leaves. The list shows a seven-row viewport and
-**scrolls** through the whole category with the mouse wheel (or the arrow keys,
-which pull the highlighted row back into view), so there is no page key to
-learn. A scrollbar sits in the gutter beside the list, and a status line under
-it reads e.g. `SHOWING 4-10 OF 10`. The mouse hovers and clicks too.
-
-## Coins, the shop and powerups
-
-Every match pays a reward built from a participation bonus, points scored,
-the longest rally and the number of returns, plus a win bonus where it
-applies (solo wins, any completed local versus match; never a spectated
-AI-vs-AI game). Solo awards scale with difficulty. Gold Rush pays coins live
-during the match and the results screen reports both figures.
-
-`STARTING_COINS` is 250, enough for a couple of early purchases. The catalog
-holds 53 items; the free "classic" skin of each category plus two free
-powerups (No Powerup and Overdrive) are owned from the start.
-
-A powerup is held **per paddle**. A human always gets the profile's equipped
-powerup, but a bot instead draws one at random from the profile's *own
-collection*: in 1P-vs-AI only the machine draws, and in AI-vs-AI both bots do.
-The draw is independent of what you equipped, so the opponent never simply
-mirrors your choice — it can coincide, but only by luck. Two-player still
-shares one equipped spec, keeping that duel symmetric. Firing is manual
-(`Space` / `Enter`); bots fire on their own reaction-like delay.
-
-**Pickup bubbles.** A few seconds into a rally a random powerup drifts onto
-the court as a glowing orb. It pays out to whichever paddle *last returned*
-the ball: the ball has to have bounced off a paddle first, so a serve floats
-straight through and nobody scores it. The collector gets that powerup running
-for its own default duration **without losing the one it was holding** —
-grabbing a pickup never costs you your special move. If nobody takes it within
-its lifetime (30 s) it vanishes, and a fresh random one arrives 3–7 s later.
-
-Only one effect of each kind can run on a paddle at a time, so every modifier
-stays idempotent and can never stack; different kinds compose normally.
-
-REVERSER treats the two sides differently on purpose. A human keeps full,
-perfectly negated control — that *is* the punishment, they have to re-map
-their own hands under pressure. A bot gets no clean mirror: it keeps
-computing the right intercept but mis-reads its own inputs in bursts, mostly
-wrong and occasionally right, so it overshoots and half-recovers like a
-disoriented player. Measured against a HARD bot that reads 100% of rallies,
-that lands at about a 27% return rate — up from 10%, which was so heavy the bot
-never contested a rally at all. Still a heavy debuff, but never the guaranteed
-free point a full negation used to hand over, and never so one-sided that the
-powerup plays the point for you.
-
-## Development
-
-```bat
-python -m unittest discover -s tests -t .   :: 455 unit tests (layout + economy + powerups + bubbles + FOCUS mode + controls + AI behaviour + persistence)
-python tools\check_imports.py               :: all 46 modules import headlessly
-python tools\check_audio.py                 :: synth -> mixer round trip
-python tools\smoke_run.py                   :: 36 end-to-end checks (shop, pickups, AI loadout)
-python tools\shots.py                       :: renders all 23 screens to PNG
-python tools\make_icon.py                   :: regenerates packaging\pongpro.ico
 ```
-
-Headless runs need `SDL_VIDEODRIVER=dummy` and `SDL_AUDIODRIVER=dummy`.
-`tools\shots.py` writes `tools\shots\*.png` so screen layout can be reviewed
-without launching the game; `tests\test_layout.py` asserts programmatically
-that no screen has overlapping or off-screen elements.
-
-## Building a Windows release
-
-```bat
 tools\build_release.bat
 ```
 
-Produces `dist\PongPro.exe` — a **single self-contained executable**, then copies
-it to `Builds\PongPro.exe`, which is what the repository ships. Double-click it
-on any Windows PC: no Python, no installer, no companion folder to lose.
+It takes about a minute. The new game appears at `dist\PongPro.exe` and is
+copied to `Builds\PongPro.exe`.
 
-The spec is `pongpro.spec` (onefile): PyInstaller packs the interpreter, pygame
-and NumPy into the executable itself. The costs are a second or two of cold
-start — it unpacks into the temp directory on every launch — and a slightly
-higher chance of antivirus heuristics flagging it, since malware uses the same
-format.
+What happens behind the scenes, in plain words:
 
-`tools\stage_build.py` refuses to stage a stale build, a build whose bytes did
-not survive the copy, or **any file under `Builds/` that git would ignore**.
-That last check earned its place: the first release shipped with the stock rule
-`*.py[cod]`, which also matches `.pyd`, so git silently dropped 63 C extension
-modules. `git add` reported success and the push went out green, yet the game
-died on another machine with `No module named '_socket'`.
+- A tool called **PyInstaller** packs the game, Python, pygame and numpy all
+  into **one single file**.
+- The result runs on any Windows computer with nothing to install.
+- A **safety check** then makes sure that file is complete before it is used.
+  (An early version of the game was missing some important parts, so every
+  build is now checked automatically.)
 
-The window and taskbar icon is generated, not shipped: it is drawn by
-`rendering/icon.py` and written to `packaging\pongpro.ico` by
-`tools\make_icon.py`, which `pongpro.spec` picks up. Run that tool once
-before building if the file is missing. At runtime the same renderer supplies
-the window icon, so the two can never drift apart.
+A couple of notes:
 
-## Project layout
+- The window's icon is drawn by the game itself. `tools\make_icon.py` creates
+  the file `packaging\pongpro.ico`, which the build uses.
+- Because the `.exe` is not signed by a company, antivirus software may
+  sometimes warn you. That is normal for games built this way.
+
+---
+
+## ✅ Checking that everything still works
+
+| Command | What it checks |
+| --- | --- |
+| `python -m unittest discover -s tests -t .` | Runs all **455** tests |
+| `python tools\check_imports.py` | All **46** parts of the game can load |
+| `python tools\check_audio.py` | Sounds are made and played correctly |
+| `python tools\smoke_run.py` | **36** end-to-end checks (shop, pickups, computer player) |
+| `python tools\shots.py` | Saves a picture of all **23** screens |
+| `python tools\make_icon.py` | Makes the icon file again |
+| `python tools\check_exe.py` | Starts the `.exe` and proves it really runs |
+| `python tools\trace_missing.py` | Confirms git has every file the game needs |
+
+Most of these do not open a window, so you can run them on any computer.
+
+Two useful ones to know about:
+
+- `python tools\check_exe.py --real` uses the real screen and sound device
+  instead of a pretend one.
+- `python tools\cleanup.py` lists temporary files you can safely delete. Add
+  `--apply` to actually delete them.
+
+---
+
+## 📁 What is inside the project folder
 
 ```
-main.py              source-checkout launcher (DPI aware)
-run.bat              Windows launcher: installs deps, then runs the game
-pongpro.spec         PyInstaller build spec (onefile)
-Builds/PongPro.exe   the shipped standalone game
+main.py              starts the game straight from the code
+run.bat              double-click this: installs what's needed, then plays
+pongpro.spec         the recipe PyInstaller follows to build the .exe
+Builds/PongPro.exe   the finished game — just double-click it
 src/pongpro/
-  app.py             application shell and frame loop
-  core/              constants, settings, events, state machine, timestep
-  audio/             NumPy synthesiser + mixer manager
-  economy/           shop catalog (53 items) + wallet, rewards, ctx cache
-  gameplay/          entities, physics, AI, match rules, FOCUS run, powerups, pickup bubbles, replay
-  rendering/         camera, fonts, HUD, icon, particles, skins, UI toolkit, video
-  scenes/            splash, menu, controls card, FOCUS explainer, shop, settings, gameplay, pause, results, replay
-  storage/           atomic JSON documents, migration and quarantine
-tests/               unit tests (no display or audio required)
-tools/               import/audio checks, smoke harness, screenshots, icon, release build, git-coverage trace
+  app.py             the main game loop (the engine that keeps everything running)
+  core/              settings, keyboard events, screen changing, timing
+  audio/             makes all the sounds and music with maths
+  economy/           the shop items (53) and your coin wallet
+  gameplay/          the paddles, ball, computer player, rules, powerups, replay
+  rendering/         drawing: camera, fonts, scores, icon, effects, colours, menu look
+  scenes/            each screen: splash, menu, controls, shop, settings, match, pause, results, replay
+  storage/           saves your progress safely on your computer
+tests/               the 455 tests (none of them need a screen or speakers)
+tools/               helper scripts: checks, screenshots, icon, building, cleanup
 ```
+
+Your saved game lives in `C:\Users\<you>\AppData\Local\PongPro` on Windows.
+It is stored as readable JSON text files, and it is written safely so a crash
+can never destroy your coins.
+
+---
+
+## 📖 Words used in this guide
+
+| Word | Meaning |
+| --- | --- |
+| **Python** | The programming language the game is written in. |
+| **pygame** | A Python add-on (a *library*) used to make games. |
+| **numpy** | A Python add-on for fast maths — the game uses it to create sounds. |
+| **`.exe`** | A program file you can double-click on Windows. |
+| **AI** | The computer player (short for *artificial intelligence*). |
+| **rally** | The ball being hit back and forth many times in a row. |
+| **return** | Successfully hitting the ball back. |
+| **powerup** | A special move you can fire during a match. |
+| **repository / repo** | This project's home on GitHub. |
+| **build** | Turning the code into a `.exe` you can double-click. |
