@@ -37,6 +37,43 @@ EARLY_MARK = "starting"           # written by Application.__init__
 DEAD_MARK = "Traceback"           # a crash we can actually quote back
 
 
+def pongpro_pids() -> set[int]:
+    """Every running ``PongPro.exe`` PID.
+
+    Used to diff before and after a run so cleanup can target only the
+    processes this invocation started, never a game the user opened themselves.
+    """
+    try:
+        out = subprocess.run(
+            ["tasklist", "/FI", "IMAGENAME eq PongPro.exe",
+             "/FO", "CSV", "/NH"],
+            capture_output=True, text=True, timeout=30,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):  # pragma: no cover
+        return set()
+    pids: set[int] = set()
+    for line in out.splitlines():
+        # CSV columns: "name","pid","session","session#","memory"
+        cells = [c.strip('"') for c in line.split('","')]
+        if len(cells) >= 2 and cells[1].isdigit():
+            pids.add(int(cells[1]))
+    return pids
+
+
+def reap(pids: set[int]) -> int:
+    """Kill these PIDs and their descendants. Returns how many we started from."""
+    for pid in sorted(pids, reverse=True):
+        try:
+            # /T walks the tree: PyInstaller's onefile bootloader runs the game
+            # as a *child*, so killing the launcher alone leaves an orphaned
+            # window with no parent left to close it.
+            subprocess.run(["taskkill", "/T", "/F", "/PID", str(pid)],
+                           capture_output=True, timeout=30)
+        except (OSError, subprocess.SubprocessError):  # pragma: no cover
+            pass
+    return len(pids)
+
+
 def launch(exe: Path, scratch: Path, real: bool) -> subprocess.Popen:
     env = os.environ.copy()
     # Redirect every writable path so the check never touches a real profile.
@@ -89,6 +126,7 @@ def main() -> int:
     print(f"profile: {scratch}")
 
     started = time.monotonic()
+    before = pongpro_pids()          # anything already running is not ours
     proc = launch(exe, scratch, args.real)
     print(f"pid   : {proc.pid}")
 
@@ -166,12 +204,25 @@ def main() -> int:
         return 0
 
     finally:
+        # Diff-based cleanup: kill only the processes this invocation created,
+        # never a game the user opened themselves.  Killing the single process
+        # we started is not enough - PyInstaller's onefile bootloader runs the
+        # game as a child and waits, so killing the launcher orphans a windowed
+        # game that no parent will ever close.
+        ours = pongpro_pids() - before
+        if ours:
+            reap(ours)
         if proc.poll() is None:
-            proc.kill()
+            proc.kill()             # fallback where taskkill is unavailable
             try:
                 proc.wait(timeout=10)
             except subprocess.TimeoutExpired:  # pragma: no cover
                 pass
+        time.sleep(1.0)
+        leftover = pongpro_pids() - before
+        if leftover:                # a leak is reported, never silently made
+            print(f"WARN: {len(leftover)} process(es) survived cleanup: "
+                  f"{sorted(leftover)}")
         shutil.rmtree(scratch, ignore_errors=True)
 
 
