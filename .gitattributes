@@ -1,0 +1,15 @@
+# Line-ending policy: keep the shipped artifacts byte-identical to what they
+# were built and tested with.
+
+# Batch files must arrive as CRLF *in the repository*, not merely on checkout.
+# core.autocrlf normalises text files to LF when committing, so GitHub would
+# hand an LF-only run.bat to anyone downloading the ZIP.  cmd.exe walks a batch
+# file line by line looking for CRLF when it resolves "goto" labels, and an
+# LF-only launcher is a known way for it to land on the wrong line - failing on
+# exactly the machines this file exists to help.  "-text" stores bytes as-is.
+*.bat -text
+
+# Explicit for the build output: the executable and its icon are payload, not
+# text to be normalised.
+*.exe binary
+*.ico binary

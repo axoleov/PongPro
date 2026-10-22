@@ -4,6 +4,15 @@ A production-grade Pong for Windows 10, built on **Python 3.12** and
 **pygame 2.6**. No binary assets: every sound effect, the music loop, and all
 visuals are generated at runtime.
 
+## Play it
+
+Download this repository and double-click **`Builds\PongPro.exe`** — one
+standalone executable that runs on any Windows 10/11 PC with no Python and
+nothing to install.
+
+To run from source instead, double-click **`run.bat`**: it finds Python,
+installs `pygame` and `numpy` on first use, and starts the game.
+
 ## Highlights
 
 - **Deterministic fixed-timestep simulation** (120 Hz physics) with render
@@ -37,6 +46,9 @@ visuals are generated at runtime.
   longest rally and the per-difficulty table are carried over untouched.
 
 ## Running from source
+
+**Windows: double-click `run.bat`.** It locates Python, installs `pygame` and
+`numpy` if they are missing, then starts the game — no commands to remember.
 
 ```bat
 python -m pip install -e .
@@ -174,9 +186,22 @@ that no screen has overlapping or off-screen elements.
 tools\build_release.bat
 ```
 
-Produces `dist\PongPro\PongPro.exe` (onedir, windowed). The spec is
-`pongpro.spec`; onedir is used instead of onefile for fast startup and to
-avoid antivirus false positives.
+Produces `dist\PongPro.exe` — a **single self-contained executable**, then copies
+it to `Builds\PongPro.exe`, which is what the repository ships. Double-click it
+on any Windows PC: no Python, no installer, no companion folder to lose.
+
+The spec is `pongpro.spec` (onefile): PyInstaller packs the interpreter, pygame
+and NumPy into the executable itself. The costs are a second or two of cold
+start — it unpacks into the temp directory on every launch — and a slightly
+higher chance of antivirus heuristics flagging it, since malware uses the same
+format.
+
+`tools\stage_build.py` refuses to stage a stale build, a build whose bytes did
+not survive the copy, or **any file under `Builds/` that git would ignore**.
+That last check earned its place: the first release shipped with the stock rule
+`*.py[cod]`, which also matches `.pyd`, so git silently dropped 63 C extension
+modules. `git add` reported success and the push went out green, yet the game
+died on another machine with `No module named '_socket'`.
 
 The window and taskbar icon is generated, not shipped: it is drawn by
 `rendering/icon.py` and written to `packaging\pongpro.ico` by
@@ -188,7 +213,9 @@ the window icon, so the two can never drift apart.
 
 ```
 main.py              source-checkout launcher (DPI aware)
-pongpro.spec         PyInstaller build spec
+run.bat              Windows launcher: installs deps, then runs the game
+pongpro.spec         PyInstaller build spec (onefile)
+Builds/PongPro.exe   the shipped standalone game
 src/pongpro/
   app.py             application shell and frame loop
   core/              constants, settings, events, state machine, timestep
@@ -199,5 +226,5 @@ src/pongpro/
   scenes/            splash, menu, controls card, FOCUS explainer, shop, settings, gameplay, pause, results, replay
   storage/           atomic JSON documents, migration and quarantine
 tests/               unit tests (no display or audio required)
-tools/               import/audio checks, smoke harness, screenshots, icon, release build
+tools/               import/audio checks, smoke harness, screenshots, icon, release build, git-coverage trace
 ```

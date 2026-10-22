@@ -1,7 +1,13 @@
-# Byte-compiled / optimised / DLL files
+# Byte-compiled / optimised files
 __pycache__/
-*.py[cod]
+*.pyc
+*.pyo
 *$py.class
+# NOTE: deliberately NOT "*.py[cod]". That looks like the same thing, but the
+# bracket also matches ".pyd" - the compiled C extension modules a frozen
+# interpreter loads at run time (_socket, _ctypes, numpy/_multiarray_umath...).
+# Git silently drops them, so the pushed build boots on the build machine and
+# dies elsewhere with "No module named '_socket'". Keep ".pyd" committable.
 
 # Distribution / packaging - always regenerable via tools\build_release.bat
 build/

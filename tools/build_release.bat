@@ -1,8 +1,9 @@
 @echo off
-rem Build a Windows distribution of PongPro (onedir, windowed).
+rem Build a Windows distribution of PongPro (onefile, windowed).
 rem
 rem Usage:  tools\build_release.bat
-rem Output: dist\PongPro\PongPro.exe
+rem Output: dist\PongPro.exe   (single self-contained executable)
+rem         Builds\PongPro.exe (copy that git actually tracks)
 
 setlocal
 cd /d "%~dp0.."
@@ -19,11 +20,17 @@ if not exist "packaging\pongpro.ico" (
 
 python -m PyInstaller --noconfirm --clean pongpro.spec || exit /b 1
 
-if not exist "dist\PongPro\PongPro.exe" (
-    echo BUILD FAILED: dist\PongPro\PongPro.exe not found
+if not exist "dist\PongPro.exe" (
+    echo BUILD FAILED: dist\PongPro.exe not found
     exit /b 1
 )
 
 echo.
-echo BUILD OK: dist\PongPro\PongPro.exe
+echo BUILD OK: dist\PongPro.exe
+
+rem Copies to Builds\ and proves every file there is trackable by git.
+rem This gate exists because the first release shipped without it and git
+rem silently dropped 63 .pyd files behind "*.py[cod]".
+python tools\stage_build.py || exit /b 1
+
 endlocal

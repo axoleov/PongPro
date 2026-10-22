@@ -1,12 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller spec for PongPro (Windows, onedir).
+"""PyInstaller spec for PongPro (Windows, **onefile**).
 
 Build with:  pyinstaller --noconfirm --clean pongpro.spec
 
-We ship **onedir** rather than onefile on purpose: onefile extracts to a temp
-dir on every launch (slow start, AV false-positives), while onedir starts
-instantly and is trivially debuggable.  There are no binary assets to collect
-because every sound and the music loop are synthesised with NumPy at start-up.
+We ship a *single* ``PongPro.exe``: double-click it on any Windows PC with no
+Python, no folder to lose, nothing to install.  PyInstaller packs the
+interpreter, pygame and NumPy into the executable itself.
+
+The costs are accepted knowingly: the bootloader unpacks into a temp directory
+on every launch (a second or two of cold start) and executables built this way
+are more likely to trip antivirus heuristics, because malware uses the same
+format.  There are no binary assets to collect because every sound and the
+music loop are synthesised with NumPy at start-up.
 """
 
 from pathlib import Path
@@ -42,28 +47,25 @@ pyz = PYZ(a.pure)
 # Optional: give the exe a real icon when one is present.
 icon = ROOT / "packaging" / "pongpro.ico"
 
+# onefile: the payloads are handed straight to EXE (no exclude_binaries, no
+# COLLECT), so everything lands inside the one executable instead of an
+# _internal/ folder beside it.  runtime_tmpdir=None is what makes the
+# bootloader unpack to the system temp directory at launch.
 exe = EXE(
     pyz,
     a.scripts,
+    a.binaries,
+    a.datas,
     [],
-    exclude_binaries=True,
     name="PongPro",
     icon=str(icon) if icon.exists() else None,  # packaging/pongpro.ico (optional)
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=False,
-    console=False,          # windowed game: no console window
+    upx_exclude=[],
+    runtime_tmpdir=None,     # single self-contained file
+    console=False,           # windowed game: no console window
     disable_windowed_traceback=False,
     argv_emulation=False,
-)
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=False,
-    upx_exclude=[],
-    name="PongPro",
 )
