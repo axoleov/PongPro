@@ -68,8 +68,8 @@ def main() -> int:
         for _ in range(frames):
             app.step_frame(1.0 / 120.0)
 
-    # -- phase 1: splash -> menu -----------------------------------------
-    run(300, "splash")
+    # -- phase 1: credits -> splash -> menu -------------------------------
+    run(1100, "credits->splash")
     check("reached main menu", isinstance(app.stack.current, MenuScene),
           type(app.stack.current).__name__)
 

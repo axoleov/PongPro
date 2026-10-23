@@ -20,7 +20,9 @@ You do **not** need to install anything.
 3. Open the **Builds** folder.
 4. Double-click **PongPro.exe**.
 
-The game starts. That's it.
+The game starts. First you see a short **credits screen** naming the game's
+creator, then the **PONG PRO** intro, then the menu. **Click anywhere** to
+skip whichever of those two screens is playing.
 
 ### If Windows says "Windows protected your PC"
 
@@ -205,7 +207,7 @@ python main.py
 
 Some handy options (use them with `python -m pongpro`):
 
-- `--skip-splash` — skip the intro screen
+- `--skip-splash` — skip the credits and the intro screen
 - `--frames N` — run N frames then stop (useful for testing)
 - `--quiet` — less text in the window
 
@@ -245,11 +247,11 @@ A couple of notes:
 
 | Command | What it checks |
 | --- | --- |
-| `python -m unittest discover -s tests -t .` | Runs all **455** tests |
-| `python tools\check_imports.py` | All **46** parts of the game can load |
+| `python -m unittest discover -s tests -t .` | Runs all **461** tests |
+| `python tools\check_imports.py` | All **47** parts of the game can load |
 | `python tools\check_audio.py` | Sounds are made and played correctly |
 | `python tools\smoke_run.py` | **36** end-to-end checks (shop, pickups, computer player) |
-| `python tools\shots.py` | Saves a picture of all **23** screens |
+| `python tools\shots.py` | Saves a picture of all **24** screens |
 | `python tools\make_icon.py` | Makes the icon file again |
 | `python tools\check_exe.py` | Starts the `.exe` and proves it really runs |
 | `python tools\trace_missing.py` | Confirms git has every file the game needs |
@@ -279,9 +281,9 @@ src/pongpro/
   economy/           the shop items (53) and your coin wallet
   gameplay/          the paddles, ball, computer player, rules, powerups, replay
   rendering/         drawing: camera, fonts, scores, icon, effects, colours, menu look
-  scenes/            each screen: splash, menu, controls, shop, settings, match, pause, results, replay
+  scenes/            each screen: credits, splash, menu, controls, shop, settings, match, pause, results, replay
   storage/           saves your progress safely on your computer
-tests/               the 455 tests (none of them need a screen or speakers)
+tests/               the 461 tests (none of them need a screen or speakers)
 tools/               helper scripts: checks, screenshots, icon, building, cleanup
 ```
 

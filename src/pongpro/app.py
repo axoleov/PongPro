@@ -36,7 +36,7 @@ from .core.timestep import FixedStepClock
 from .rendering.fonts import FontManager
 from .rendering.icon import window_icon
 from .rendering.video import VideoSystem
-from .scenes.splash import SplashScene
+from .scenes.credits import CreditsScene
 from .storage import Storage
 
 log = logging.getLogger(__name__)
@@ -119,7 +119,7 @@ class Application:
         )
         self.stack = SceneStack((LOGICAL_W, LOGICAL_H), self.ctx)
         self.ctx.stack = self.stack
-        self.stack.push(SplashScene(), transition=Transition.NONE)
+        self.stack.push(CreditsScene(), transition=Transition.NONE)
 
         self.timestep = FixedStepClock()
         self.clock = pygame.time.Clock()

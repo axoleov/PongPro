@@ -33,6 +33,7 @@ from pongpro.core.constants import (  # noqa: E402
 )
 from pongpro.core.state_machine import Transition  # noqa: E402
 from pongpro.rendering.hud import Hud  # noqa: E402
+from pongpro.scenes.credits import CreditsScene  # noqa: E402
 from pongpro.scenes.gameplay import GameplayScene  # noqa: E402
 from pongpro.scenes.menu import MenuScene  # noqa: E402
 from pongpro.scenes.pause import PauseScene  # noqa: E402
@@ -156,7 +157,12 @@ def main() -> int:
         for _ in range(frames):
             app.step_frame(1.0 / 120.0)
 
-    run(300)  # splash -> menu
+    # -- credits: caught in the still hold, everything on screen -----------
+    assert isinstance(app.stack.current, CreditsScene)
+    run(555)  # ~4.6 s: both rules drawn, name resolved, bloom settled
+    shot(app, "00_credits")
+
+    run(560)  # credits -> splash -> menu
 
     # -- menu: empty profile, then a fully populated one -------------------
     menu = app.stack.current

@@ -77,7 +77,7 @@ class SplashScene(Scene):
                                 title_rect.bottom + 12))
 
         version = self.ctx.fonts.render(  # type: ignore[attr-defined]
-            f"v{__version__}  ·  PYTHON 3.12  ·  PYGAME-CE", 14, Color.TEXT_DIM)
+            f"v{__version__}  ·  PYTHON 3.12  ·  PYGAME 2.6.1", 14, Color.TEXT_DIM)
         surface.blit(version, (LOGICAL_W // 2 - version.get_width() // 2, 60))
 
         # Boot progress bar: animates across the splash, completes when ready.

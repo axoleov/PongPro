@@ -48,6 +48,7 @@ MODULES = [
     "pongpro.rendering.ui",
     "pongpro.rendering.video",
     "pongpro.scenes.common",
+    "pongpro.scenes.credits",
     "pongpro.scenes.splash",
     "pongpro.scenes.controls",
     "pongpro.scenes.focus_intro",

@@ -42,6 +42,7 @@ from pongpro.rendering.hud import (
     match_state_rects,
 )
 from pongpro.scenes import menu as menu_mod
+from pongpro.scenes.credits import CreditsScene
 from pongpro.scenes.gameplay import GameplayScene
 from pongpro.scenes.menu import MenuScene
 from pongpro.scenes.pause import PauseScene
@@ -67,6 +68,7 @@ from pongpro.scenes.results import (
 )
 from pongpro.scenes.settings_scene import SettingsScene
 from pongpro.scenes.shop import HIT_PAD, ROW_STEP, ShopScene
+from pongpro.scenes.splash import SplashScene
 
 VIEWPORT = pygame.Rect(0, 0, LOGICAL_W, LOGICAL_H)
 
@@ -113,7 +115,7 @@ def setUpModule() -> None:
     _app = Application(max_frames=None, quiet=True)
     _app.settings.video.fps_cap = 0
     _app.settings.audio.master = 0.0
-    _advance(400)  # splash -> menu
+    _advance(1100)  # credits -> splash -> menu
 
 
 def tearDownModule() -> None:
@@ -612,6 +614,84 @@ class ShopLayoutTests(LayoutAssertions):
 # ---------------------------------------------------------------------------
 # scene navigation: does clicking reach the same place the keys do?
 # ---------------------------------------------------------------------------
+class CreditsIntroTests(LayoutAssertions):
+    """The boot credits screen: it draws, it fits, and it hands off.
+
+    Boot order is credits -> PONG PRO splash -> menu, every launch.  A click
+    skips only the screen it is on, so these tests pin the hand-off target
+    (``SplashScene``, not the menu) and the timer that drives it.
+    """
+
+    CREDITS = "AASHIRYA WILSON D'SOUZA"
+
+    def _credits(self) -> CreditsScene:
+        """Leave the app on a freshly pushed CreditsScene and return it."""
+        pygame.event.clear()
+        _app.stack.push(CreditsScene(), transition=Transition.NONE)
+        _advance(4)
+        self.assertIsInstance(_app.stack.current, CreditsScene)
+        return _app.stack.current  # type: ignore[return-value]
+
+    def test_credits_draws(self) -> None:
+        scene = self._credits()
+        surface = pygame.Surface((LOGICAL_W, LOGICAL_H), pygame.SRCALPHA)
+        for moment in (0.0, 2.0, 3.8, 5.0):  # every beat, plus mid-sweep
+            scene._t = moment
+            scene.draw(surface)
+
+    def test_credits_text_fits(self) -> None:
+        """Both copy lines must fit the viewport at their scene sizes."""
+        scratch = pygame.Surface((LOGICAL_W, LOGICAL_H), pygame.SRCALPHA)
+        scene = self._credits()
+        scene._t = 4.5  # everything visible
+        scene.draw(scratch)
+        for text in ("GAME CREATOR", self.CREDITS):
+            width = _app.fonts.render(text, 64, (255, 255, 255),
+                                      bold=True).get_width()
+            self.assertLess(width, LOGICAL_W - 160,
+                            f"{text!r} is {width} px wide and would clip")
+
+    def test_credits_click_advances_to_splash(self) -> None:
+        """A click skips credits into the *splash*, not past it to the menu."""
+        scene = self._credits()
+        stack = _app.stack
+        pygame.event.post(pygame.event.Event(
+            pygame.MOUSEBUTTONDOWN, {"button": 1, "pos": (0, 0)}))
+        _advance(60)  # plenty for the fade to complete
+        self.assertIsInstance(stack.current, SplashScene)
+
+    def test_credits_key_advances_to_splash(self) -> None:
+        scene = self._credits()
+        stack = _app.stack
+        pygame.event.post(pygame.event.Event(
+            pygame.KEYDOWN, {"key": pygame.K_RETURN}))
+        _advance(60)
+        self.assertIsInstance(stack.current, SplashScene)
+
+    def test_credits_advances_on_its_own_timer(self) -> None:
+        """Untouched, credits must expire into the splash by themselves."""
+        scene = self._credits()
+        stack = _app.stack
+        _advance(760)  # 5.6 s of credits + fade, at 120 Hz
+        self.assertIsInstance(stack.current, SplashScene)
+
+    def test_splash_version_string_says_pygame(self) -> None:
+        """Text-regression guard on the literal in ``SplashScene.draw``.
+
+        The runtime is plain pygame 2.6.1; the splash used to claim
+        PYGAME-CE.  Pinning the literal directly is the honest test -
+        rendering the surface and scanning pixels would be theatre.
+        """
+        import pathlib
+
+        from pongpro.scenes import splash as splash_mod
+
+        text = pathlib.Path(splash_mod.__file__).read_text(encoding="utf-8")
+        self.assertNotIn("PYGAME-CE", text,
+                         "the splash still claims pygame-ce on screen")
+        self.assertIn("PYGAME 2.6.1", text)
+
+
 class SceneNavigationTests(LayoutAssertions):
     """Regression cover for mouse-driven navigation.
 
