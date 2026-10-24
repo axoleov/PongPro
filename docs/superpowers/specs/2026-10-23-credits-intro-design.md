@@ -6,7 +6,7 @@ plus tests and screenshots)
 ## Intent
 
 PongPro opens with a PONG PRO splash and never names anyone. The creator wants
-**Aashirya Wilson D'Souza** shown at every launch as the sole credited person.
+**Ashirya Wilson D'Souza** shown at every launch as the sole credited person.
 This is a school project that will be shown to a teacher, so the wording must
 be exact and the presentation must look deliberate rather than busy.
 
@@ -17,7 +17,7 @@ be exact and the presentation must look deliberate rather than busy.
 - A click skips **only the screen it is on**: credits → PONG PRO → menu.
 - Fully animated in the game's existing visual language.
 - The screen carries **exactly two lines of text**:
-  `GAME CREATOR` and `AASHIRYA WILSON D'SOUZA`. Nothing else.
+  `GAME CREATOR` and `ASHIRYA WILSON D'SOUZA`. Nothing else.
 - Fix the splash's on-screen text: `PYGAME-CE` → `PYGAME 2.6.1`.
 
 ## Non-goals
@@ -59,7 +59,7 @@ drifting particle field, the cycling P1→P2 accent colour, a thin progress line
 along the bottom, and a pulsing `CLICK ANYWHERE TO SKIP`.
 
 There are only **two pieces of text on screen, ever** — `GAME CREATOR` and
-`AASHIRYA WILSON D'SOUZA`. Everything else is pure ornament: thin rule lines,
+`ASHIRYA WILSON D'SOUZA`. Everything else is pure ornament: thin rule lines,
 light and motion. That is how a single credit still reads as a deliberate,
 rich opening rather than a placeholder.
 
@@ -68,7 +68,7 @@ draws itself outward from the centre; `GAME CREATOR` fades up beneath it in
 wide letterspacing.
 
 **Beat 2 — 1.6–4.0 s — The name.** Each letter of
-`AASHIRYA WILSON D'SOUZA` resolves in sequence, rising a short distance while
+`ASHIRYA WILSON D'SOUZA` resolves in sequence, rising a short distance while
 fading in. When the last letter lands, one light sweep travels left→right
 across the word and a soft glow blooms behind it.
 
@@ -94,7 +94,7 @@ lands on the menu.
 - **Copy is fixed and minimal** — the two lines above, and nothing more.
   Rendered in caps to match the rest of the game's typography
   (`PONG PRO`, `PRODUCTION EDITION`, `FOCUS`), and spelled exactly as given:
-  `AASHIRYA WILSON D'SOUZA`.
+  `ASHIRYA WILSON D'SOUZA`.
 - `app.py` boots `CreditsScene()` instead of `SplashScene()`.
 - `--skip-splash` keeps replacing the boot scene with the menu, and therefore
   now skips the credits too.

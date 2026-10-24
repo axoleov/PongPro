@@ -29,7 +29,7 @@ from .common import draw_backdrop
 
 CREDITS_SECONDS = 5.6
 LABEL = "GAME CREATOR"
-NAME = "AASHIRYA WILSON D'SOUZA"
+NAME = "ASHIRYA WILSON D'SOUZA"
 
 #: Beat schedule (seconds).
 LABEL_START, NAME_START, RULE2_START = 0.2, 1.6, 4.0

@@ -41,7 +41,7 @@ test can jump to any time by stepping frames.
 **Copy — exactly two lines, nothing else readable on screen:**
 
 - `GAME CREATOR` — small label, wide letterspacing, `Color.TEXT_DIM`
-- `AASHIRYA WILSON D'SOUZA` — the name, `Color.TEXT`, accent-cycled glow
+- `ASHIRYA WILSON D'SOUZA` — the name, `Color.TEXT`, accent-cycled glow
 
 All-caps, to match `PONG PRO` / `PRODUCTION EDITION` / `FOCUS`. No AI credit
 line. No AI product named anywhere.
@@ -138,7 +138,7 @@ Constants:
 ```python
 CREDITS_SECONDS = 5.6
 LABEL = "GAME CREATOR"
-NAME = "AASHIRYA WILSON D'SOUZA"
+NAME = "ASHIRYA WILSON D'SOUZA"
 LABEL_START, NAME_START, RULE2_START = 0.2, 1.6, 4.0
 LETTER_STAGGER, LETTER_DURATION = 0.07, 0.35
 SWEEP_AT = 3.6

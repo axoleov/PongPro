@@ -622,7 +622,7 @@ class CreditsIntroTests(LayoutAssertions):
     (``SplashScene``, not the menu) and the timer that drives it.
     """
 
-    CREDITS = "AASHIRYA WILSON D'SOUZA"
+    CREDITS = "ASHIRYA WILSON D'SOUZA"
 
     def _credits(self) -> CreditsScene:
         """Leave the app on a freshly pushed CreditsScene and return it."""
